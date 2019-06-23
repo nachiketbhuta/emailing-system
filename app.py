@@ -28,20 +28,20 @@ def readCsv():
 
         # Convert the uploaded file into Stream
         stream = io.StringIO(f.stream.read().decode("UTF8"), newline=None)
-        csv_rows = list(csv.reader(stream, delimiter=","))
+        # csv_rows = list(csv.reader(stream, delimiter=","))
+        csvlist = []
+        csvreader = csv.reader(stream)
+        for row in csvreader:
+            csvlist.append(row)
+        csvlist = csvlist[1:]
 
         emails = []
         names = []
 
         # Split emails and names from CSV file
-        for i in range(len(csv_rows)):
-            for j in range(len(csv_rows[i])):
-                if is_valid_email(csv_rows[i][j]):
-                    emails.append(csv_rows[i][j])
-                else:
-                    names.append(csv_rows[i][j])
-
-        # print(emails)
+        for i in range(len(csvlist)):
+            emails.append(csvlist[i][0])
+            names.append(csvlist[i][1])
 
         # Only this part is remaining
         for i in range(len(names)):
@@ -50,6 +50,7 @@ def readCsv():
             msg.body = generateMessage(names[i])
             msg.add_recipient(emails[i])
             mail.send(msg)
+            # print(msg.recipients)
 
         return ''
 
@@ -60,6 +61,8 @@ def is_valid_email(email):
         return bool(re.match("^.+@(\[?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$", email))
 
 # To generate body depending on markdown file
+
+
 def generateMessage(name):
     html = markdown.markdown(open("body.md").read())
     soup = BeautifulSoup(html, features="lxml")
